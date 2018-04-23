@@ -1,0 +1,98 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+      .nav {
+        background-color: #ff4d4d;
+        position: fixed;
+        width: 100%;
+        margin: 0px;
+      }
+      .nav-text {
+        color: black;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="navbar nav">
+      <a href="snapshots.html" class="nav-text">A Preview of nanoTwitter</a> | <a href="index.html" class="nav-text">Back to home</a> | <a href="http://nanotwitter-client.s3-website.us-east-1.amazonaws.com/"  class="nav-text">To nanoTwitter site</a>
+    </div>
+    <br><br><br>
+
+    <h2>How do we make nanoTwitter work?</h2>
+    <br>
+
+      <h3>Overview</h3>
+        <p>nanoTwitter is built off of the Sinatra server architecture, a technology based in Ruby that uses the Activerecord data object storing scheme. The main goal of nanoTwitter is to provide a simple, yet scalable social media site, and so many of the technologies employed seek in some way to assist in that goal.</p>
+      <br><br>
+
+      <h3>Microservices</h3>
+        <p>nanoTwitter is comprised of a main application and four microservices that it calls upon in order to provide its functionality. In particular, nanoTwitter employs microservices for the following actions:</p>
+        <ul>
+          <li>User Logins/Registration</li>
+          <li>Following/Unfollowing Users</li>
+          <li>Reading Tweets</li>
+          <li>Writing Tweets</li>
+        </ul>
+        <p>The services communicate with each other mainly by REST calls, though the interactions between the main application and the Tweet writing service is done via RabbitMQ.</p>
+        <br><br>
+
+      <h3>Main application</h3>
+        <h4>Purpose</h4>
+          <p> All of the functionality listed in the services is not provided in the main application. The only purpose of the main application is to provide an interface for its users. Whenever a user wants to make an action, the main application will call upon one of the four microservices listed below.</p>
+          <br>
+
+        <h4>Technologies Used</h4>
+          <p>We implemented Amazon's Beanstalk to host the nanoTwitter main application.</p>
+
+          <p>The main application relies on a framework called "Choo," which uses a small API and no new languages to provide a very quick and durable means of ferrying HTML to its users. In particular, every route that the main application accesses has the HTML of the pages it accesses handled by Choo first.</p>
+
+      <br></br>
+      <h3>User Logins/Registrations</h3>
+        <h4>Purpose</h4>
+          <p>nanoTwitter's User service receives any requests from the main application</p>
+          <br>
+
+        <h4>Technologies Used</h4>
+          <p></p>
+        <br><br>
+
+      <h3>Following/Unfollowing Users</h3>
+        <h4>Purpose</h4>
+          <p>nanoTwitter's User service receives any requests from the main application</p>
+            <br>
+
+        <h4>Technologies Used</h4>
+          <p></p>
+        <br><br>
+
+      <h3>Reading Tweets</h3>
+        <h4>Purpose</h4>
+          <p>nanoTwitter's Tweet reading service handles all get requests from the main application to retrieve Tweets in some manner. In particular, it works on retrieving Tweets recently added by users, the a user's posting history in reverse chronological order and the history of Tweets posted by users that a user is following in reverse chronological order.</p>
+            <br>
+
+        <h4>Technologies Used</h4>
+          <p>This Tweet reading service uses MongoDB via the Mongoid gem and cloud service mLab as its storage system. Its NoSQL structure and ability to store Arrays and Hashes in documents was the main reason for employing this database technology.</p>
+          <br>
+
+          <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate.</p>
+        <br><br>
+
+      <h3>Writing Tweets</h3>
+        <h4>Purpose</h4>
+          <p>The Tweet writing service has the singular task of recording the new Tweets that the users of the application create. Since a Tweet is expected to be able to mention other users, the Tweet writing service must also make the occasional call to the User service to check if the mentions passed to it are actually valid.</p>
+            <br>
+
+        <h4>Technologies Used</h4>
+          <p>This Tweet writing service uses MongoDB via the Mongoid gem and cloud service mLab as its storage system. Its NoSQL structure and ability to store Arrays and Hashes in documents was the main reason for employing this database technology.</p>
+        <br>
+
+          <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate, and the Tweet writing service must continually update the reader's caches to ensure it stays up to date.</p>
+        <br>
+
+          <p>Finally, the Tweet writing service makes use of RabbitMQ (running on the Unicorn server as opposed to its original CloudAMQP), an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly.</p>
+        <br>
+
+  </body>
+</html>
