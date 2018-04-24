@@ -86,7 +86,7 @@
             <br>
 
         <h4>Technologies Used</h4>
-          <p>It also makes use of RabbitMQ, an asynchronous messaging system between services, but the exact functionality is on yet another microservice solely dedicated to handling RabbitMQ requests. It needs this service to help the Tweet reading service update the caches for Tweets every time a user makes a change in whom they follow.</p>
+          <p>It also makes use of RabbitMQ (via RabbitAMQP), an asynchronous messaging system between services, but the exact functionality is on yet another microservice solely dedicated to handling RabbitMQ requests. It needs this service to help the Tweet reading service update the caches for Tweets every time a user makes a change in whom they follow.</p>
         <br><br>
 
       <h3>Reading Tweets</h3>
@@ -101,7 +101,7 @@
 
           <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate. To mitigate traffic to a single Redis instance, the service uses two caches with identical contents.</p>
 
-          <p>Finally, this service employs RabbitMQ to communicate with the Following/Unfollowing service. Whenever a user changes whom they follow, another microservice that handles RabbitMQ messages receives the update and changes the cache for every user's timeline of Tweets.</p>
+          <p>Finally, this service employs RabbitMQ (via RabbitMQ) to communicate with the Following/Unfollowing service. Whenever a user changes whom they follow, another microservice that handles RabbitMQ messages receives the update and changes the cache for every user's timeline of Tweets.</p>
         <br><br>
 
       <h3>Writing Tweets</h3>
@@ -117,7 +117,7 @@
           <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate, and the Tweet writing service must continually update the reader's caches to ensure it stays up to date. To further speed up actions, it utilizes two caches to mitigate traffic to either.</p>
         <br>
 
-          <p>Finally, the Tweet writing service makes use of RabbitMQ (running on the Unicorn server as opposed to its original CloudAMQP), an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly. However, the actual handling of RabbitMQ is done on another microservice dedicated solely to handling messaging.</p>
+          <p>Finally, the Tweet writing service makes use of RabbitMQ (running on CloudAMQP vs. BigWig), an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly. However, the actual handling of RabbitMQ is done on another microservice dedicated solely to handling messaging.</p>
         <br>
 
   </body>
