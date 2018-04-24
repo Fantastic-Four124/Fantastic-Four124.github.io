@@ -117,7 +117,7 @@
           <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate, and the Tweet writing service must continually update the reader's caches to ensure it stays up to date. To further speed up actions, it utilizes two caches to mitigate traffic to either.</p>
         <br>
 
-          <p>Finally, the Tweet writing service makes use of RabbitMQ (running on CloudAMQP vs. BigWig), an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly. However, the actual handling of RabbitMQ is done on another microservice dedicated solely to handling messaging.</p>
+          <p>Finally, the Tweet writing service makes use of RabbitMQ, an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly. However, the actual handling of RabbitMQ is done on another microservice dedicated solely to handling messaging.</p>
         <br>
 
   </body>
