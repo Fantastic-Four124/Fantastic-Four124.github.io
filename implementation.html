@@ -53,35 +53,41 @@
         <br><br>
 
       <h3>Main application</h3>
+      <br>
         <h4>Purpose</h4>
-          <p> All of the functionality listed in the services is not provided in the main application. The only purpose of the main application is to provide an interface for its users. Whenever a user wants to make an action, the main application will call upon one of the four microservices listed below.</p>
+          <p> All of the functionality listed in the services is not provided in the main application. The only purpose of the main application is to provide an interface for its users. Whenever a user wants to make an action, the main application will call upon one of the four major microservices listed below.</p>
           <br>
 
         <h4>Technologies Used</h4>
-          <p>We implemented Amazon's Beanstalk to host the nanoTwitter main application.</p>
+          <p>We implemented Amazon's Beanstalk to host the nanoTwitter main application. It, unlike Heroku, handles load balancing for our application, saving us time and code.</p>
 
-          <p>The main application relies on a framework called "Choo," which uses a small API and no new languages to provide a very quick and durable means of ferrying HTML to its users. In particular, every route that the main application accesses has the HTML of the pages it accesses handled by Choo first.</p>
+          <p>The main application relies on a new Javascript framework called "Choo," which uses a small API and no new languages to provide a very quick, lightweight and durable means of ferrying HTML to its users. It sends a Javascript bundle to the client, making the client perform the work of rendering the application instead of having the server render the HTML. In our case, every route that the main application accesses has the HTML of the pages it accesses handled by Choo first.</p>
 
       <br></br>
       <h3>User Logins/Registrations</h3>
+      <br>
         <h4>Purpose</h4>
-          <p>nanoTwitter's User service receives any requests from the main application</p>
+          <p>nanoTwitter's User service receives any requests from the main application concerning users and sends them to this service, which checks the database if the user's credentials are stored. It will then register or authenticate the user, depending on the action the user requested.</p>
           <br>
 
         <h4>Technologies Used</h4>
-          <p></p>
+          <p>The User service makes use of the Postgres database, implemented by Heroku. Its quick and familiar structure made it ideal for this task.</p>
+
+          <p>The service also made use of Redis, a caching service. This allows the User service to quickly reference user data without having to check the database, keeping actions relatively quick.</p>
         <br><br>
 
       <h3>Following/Unfollowing Users</h3>
+      <br>
         <h4>Purpose</h4>
-          <p>nanoTwitter's User service receives any requests from the main application</p>
+          <p>nanoTwitter's Following/Unfollowing service keeps track of the relationships users have between each other. Every time a user makes a change to one of these relationships, this service intercepts the request and handles it.</p>
             <br>
 
         <h4>Technologies Used</h4>
-          <p></p>
+          <p>It also makes use of RabbitMQ, an asynchronous messaging system between services, but the exact functionality is on yet another microservice solely dedicated to handling RabbitMQ requests. It needs this service to help the Tweet reading service update the caches for Tweets every time a user makes a change in whom they follow.</p>
         <br><br>
 
       <h3>Reading Tweets</h3>
+      <br>
         <h4>Purpose</h4>
           <p>nanoTwitter's Tweet reading service handles all get requests from the main application to retrieve Tweets in some manner. In particular, it works on retrieving Tweets recently added by users, the a user's posting history in reverse chronological order and the history of Tweets posted by users that a user is following in reverse chronological order.</p>
             <br>
@@ -90,10 +96,13 @@
           <p>This Tweet reading service uses MongoDB via the Mongoid gem and cloud service mLab as its storage system. Its NoSQL structure and ability to store Arrays and Hashes in documents was the main reason for employing this database technology.</p>
           <br>
 
-          <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate.</p>
+          <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate. To mitigate traffic to a single Redis instance, the service uses two caches with identical contents.</p>
+
+          <p>Finally, this service employs RabbitMQ to communicate with the Following/Unfollowing service. Whenever a user changes whom they follow, another microservice that handles RabbitMQ messages receives the update and changes the cache for every user's timeline of Tweets.</p>
         <br><br>
 
       <h3>Writing Tweets</h3>
+      <br>
         <h4>Purpose</h4>
           <p>The Tweet writing service has the singular task of recording the new Tweets that the users of the application create. Since a Tweet is expected to be able to mention other users, the Tweet writing service must also make the occasional call to the User service to check if the mentions passed to it are actually valid.</p>
             <br>
@@ -102,10 +111,10 @@
           <p>This Tweet writing service uses MongoDB via the Mongoid gem and cloud service mLab as its storage system. Its NoSQL structure and ability to store Arrays and Hashes in documents was the main reason for employing this database technology.</p>
         <br>
 
-          <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate, and the Tweet writing service must continually update the reader's caches to ensure it stays up to date.</p>
+          <p>It also makes use of Redis, a third party cache provider that enables users to implement caching of data. This allows the Tweet reading service to return Tweets to the users at an acceptable rate, and the Tweet writing service must continually update the reader's caches to ensure it stays up to date. To further speed up actions, it utilizes two caches to mitigate traffic to either.</p>
         <br>
 
-          <p>Finally, the Tweet writing service makes use of RabbitMQ (running on the Unicorn server as opposed to its original CloudAMQP), an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly.</p>
+          <p>Finally, the Tweet writing service makes use of RabbitMQ (running on the Unicorn server as opposed to its original CloudAMQP), an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly. However, the actual handling of RabbitMQ is done on another microservice dedicated solely to handling messaging.</p>
         <br>
 
   </body>
