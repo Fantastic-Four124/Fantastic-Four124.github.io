@@ -70,7 +70,7 @@
       <h3>User Logins/Registrations</h3>
       <br>
         <h4>Purpose</h4>
-          <p>nanoTwitter's User service receives any requests from the main application concerning users and sends them to this service, which checks the database if the user's credentials are stored. It will then register or authenticate the user, depending on the action the user requested.</p>
+          <p>nanoTwitter's User service receives any requests from the main application concerning users and sends them to this service, which checks the database if the user's credentials are stored. It will then register or authenticate the user, depending on the action the user requested. We are also using bcrypt to improve the security of the passwords</p>
           <br>
 
         <h4>Technologies Used</h4>
@@ -119,6 +119,26 @@
 
           <p>Finally, the Tweet writing service makes use of RabbitMQ, an asynchronous messaging service that allows different parts of an application to run independently of each other. Given that database accesses are fairly slow, we decided to implement RabbitMQ for this service in order to keep the rest of the application running smoothly. However, the actual handling of RabbitMQ is done on another microservice dedicated solely to handling messaging.</p>
         <br>
-
+   
+      <h3>Special Notes on Timeline updates </h3> 
+       <br>
+          <p>Timeline should be most difficult part of the backend service in the our nano-twitter, as it involves all of the services and contains a lot of scenarios. In order to speed up the loading of the timeline, we decide to use push model in the most of the cases and pull model when the Redis does not have the timeline of a target user.</p>
+          <br>
+          
+          <p>The push model starts from posting a tweet. After a user finishes writing his tweets, this tweet will be send to the timeline queue all of his followers on Redis. Although it takes O(n) time, where n is the number of his follower, since this action is  done by accessing cache and can be done with asynchronous saving with message broker, the user who writes this tweet is able to do other things he wants without waiting the tweet saving is done. In other words, if the social graph does not change, i.e the following relation of a person doesn't change, his corresponding timeline can be retrieved by O(1) time through access his timeline list on Redis.</p>
+          <br>
+  
+          <p>What if a user follows a new leader? Well, we just need to merge the new leader's feeds and the user's current timeline, partially. Here is how I approach it, observing the feed of the new leader and the timeline of the user is naturally ordered by time, this problem becomes sorting two sorted list and have the top 50 elements, which we can solve problem by 2 pointers.</p>
+          <br>
+  
+          <p>What if a user unfollow a leader? In this case, it looks like we need to reassemble the timeline. However, similar with how we deal with following a new leader, this will become a sorting n sorted list and have the top 50 elements, which we can finish that by using n pointers.</p>
+          <br>
+  
+          <p>Since this kind of push does not need to be done with users' waiting, we put all of these actions to a message queue and done it by another microservices.</p>
+          <br>
+  
+          <p>When it comes to no timeline on redis, we are using the strategy we have for unfollowing a leader, but since we are now actively grasping the tweets when reading, we call this pull model.  </p>
+          <br>
+  
   </body>
 </html>
